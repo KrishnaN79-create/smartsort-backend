@@ -11,10 +11,17 @@ app.use(cors());
 app.post("/gemini", async (req, res) => {
   const { prompt } = req.body;
 
+const API_KEY = process.env.GEMINI_API_KEY;
+
+if (!API_KEY) {
+  console.error("❌ ERROR: GEMINI_API_KEY is missing in Render environment variables");
+  process.exit(1);
+}
+
   try {
     const response = await fetch(
              "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-        process.env.GEMINI_API_KEY,
+        ${API_KEY},
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
