@@ -8,7 +8,6 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors()); 
-
 app.post("/gemini", async (req, res) => {
   const { prompt } = req.body;
 
@@ -26,14 +25,23 @@ app.post("/gemini", async (req, res) => {
     );
 
     const data = await response.json();
-    res.json(data);
+
+    // If Gemini returned an error, forward it clearly
+    if (data.error) {
+      return res.status(400).json({ error: data.error });
+    }
+
+    // Ensure consistent structure
+    const text =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response from Gemini";
+
+    res.json({ text });
 
   } catch (error) {
     console.error("Gemini API Error:", error);
     res.status(500).json({ error: "Failed to reach Gemini API" });
   }
-});
-
- 
+}); 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
