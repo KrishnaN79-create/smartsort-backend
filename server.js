@@ -41,6 +41,46 @@ app.post("/gemini", async (req, res) => {
     }
 }); // ← THIS was missing in your version
 
+
+// ---------------------- PHOTO ENDPOINT ----------------------
+app.post("/gemini-photo", async (req, res) => {
+    const { prompt, image } = req.body;
+
+    if (!image) {
+        return res.status(400).json({ error: "No image provided" });
+    }
+
+    try {
+        const response = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+                process.env.GEMINI_API_KEY,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                { text: prompt },
+                                image // inlineData from client
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
+
+        const data = await response.json();
+        const text =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "No response";
+
+        res.json({ result: text });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ---------------- IMAGE ENDPOINT ----------------
 app.post("/gemini-image", async (req, res) => {
     const { prompt, image } = req.body;
