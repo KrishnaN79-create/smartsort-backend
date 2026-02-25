@@ -7,7 +7,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "10mb" })); // allow base64 images
 
 // ---------------- TEXT ENDPOINT ----------------
 app.post("/gemini", async (req, res) => {
@@ -39,10 +39,9 @@ app.post("/gemini", async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}); // ← THIS was missing in your version
+});
 
-
-// ---------------------- PHOTO ENDPOINT ----------------------
+// ---------------- PHOTO ENDPOINT (base64 from <img src="...">) ----------------
 app.post("/gemini-photo", async (req, res) => {
     const { prompt, image } = req.body;
 
@@ -62,7 +61,7 @@ app.post("/gemini-photo", async (req, res) => {
                         {
                             parts: [
                                 { text: prompt },
-                                image // inlineData from client
+                                image
                             ]
                         }
                     ]
@@ -81,7 +80,7 @@ app.post("/gemini-photo", async (req, res) => {
     }
 });
 
-// ---------------- IMAGE ENDPOINT ----------------
+// ---------------- IMAGE ENDPOINT (file upload → inlineData) ----------------
 app.post("/gemini-image", async (req, res) => {
     const { prompt, image } = req.body;
 
